@@ -2,7 +2,7 @@ if (!isServer and hasInterface) exitWith {};
 
 if (server getVariable "blockCSAT") exitWith {diag_log format ["Info: Small attack on %1 called off, communications blocked.", _marker]};
 
-params ["_marker",["_forceBase",""]];
+params ["_marker",["_forceBase",""],["_type", "small"]];
 private ["_markerPos","_allVehicles","_allGroups","_allSoldiers","_base","_airport","_forcedAttack","_exit","_nearestMarker","_radioContact","_involveCSAT","_threatEvaluation","_attackDuration","_originPosition","_maxCounter","_vehicleType","_timeOut","_spawnPosition","_vehicleData","_vehicle","_vehicleGroup","_redVehicles","_redGroups","_redSoldiers","_wp_01","_wp_02","_wp_03","_groupType","_group","_dismountPosition","_helipad","_posData","_initVehicle","_posRoad","_dir","_vehicleArray","_initData","_groupCounter","_seats","_groupTwo"];
 
 _allVehicles = [];
@@ -28,31 +28,11 @@ if !(_forceBase == "") then {
 
 //Conditions to prevent the counterattack
 	//diag_fps
-		if (!(_forcedAttack) AND (count allunits > 200)) exitWith {diag_log format ["Info: Small attack on %1 called off, too many units.", _marker]};
+if (!(_forcedAttack) AND (count allunits > 200)) exitWith
+{
+	diag_log format ["Info: Small attack on %1 called off, too many units.", _marker]
+};
 
-		_exit = false;
-	//another counterattack active in same zone (disabled)
-		if (_isMarker) then {
-			if (!_forcedAttack) then {
-				if (_marker in smallCAmrk) then {
-					_exit = true;
-				};
-			};
-		} else {
-			_nearestMarker = [smallCApos,_marker] call BIS_fnc_nearestPosition;
-			if (_nearestMarker distance _marker < (distanciaSPWN/2)) then {
-				_exit = true;
-			} else {
-				if (count smallCAmrk > 0) then {
-					_nearestMarker = [smallCAmrk,_marker] call BIS_fnc_nearestPosition;
-					if (getMarkerPos _nearestMarker distance _marker < (distanciaSPWN/2)) then {_exit = true};
-				};
-			};
-		};
-	//if (_exit) exitWith {diag_log format ["Info: Small attack on %1 called off, nearby small attack already in progress.", _marker]}; //Stef 05/12 patrolca should replace dead units, so no points to prevent several in same zone.
-	//missing radio coverage (disabled)
-		//_radioContact = [([_marker] call AS_fnc_radioCheck), true] select (_forcedAttack);  Stef 21/09 removed Radiotower QRF check.
-		//if !(_radioContact) exitWith {diag_log format ["Info: Small attack on %1 called off, no radio contact.", _marker]};
 
 if !(_forcedAttack) then {
 	_base = [_marker] call AS_fnc_findBaseForCA;
@@ -61,10 +41,14 @@ if !(_forcedAttack) then {
 
 _involveCSAT = false;
 if ((_base == "") AND (_airport == "")) then {
+	//Why only involve them when AAF have no bases?
 	_involveCSAT = (random 100 < server getVariable "prestigeCSAT");
 };
 
-if ((_base == "") AND (_airport == "") AND !(_involveCSAT)) exitWith {diag_log format ["Info: Small attack on %1 called off, no base to attack from.", _marker]};
+if ((_base == "") AND (_airport == "") AND !(_involveCSAT)) exitWith 
+{
+	diag_log format ["Info: Small attack on %1 called off, no base to attack from.", _marker]
+};
 
 // threatEval -- it isn't working because of unlocks missing; values should be adjusted to different conditions
 	if ((_base == "") AND (!(_airport == "") OR (_involveCSAT))) then {

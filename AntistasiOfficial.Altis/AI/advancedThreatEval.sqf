@@ -18,6 +18,7 @@ _threatLevelAA = 0;
 _threatLevelAT = 0;
 _threatLevelAir = 0;
 _threatLevelGround = 0;
+_detectedInfantry = [];
 _detectedAIRVehicles = [];
 _detectedARMOREDVehicles = [];
 _detectedCARVehicles = [];
@@ -65,6 +66,7 @@ _detectedCARVehicles = [];
 		}
 		if(secondaryWeapon _x in genAALaunchers) then {_threatLevelAA = _threatLevelAA + 2};
 		if(secondaryWeapon _x in genATLaunchers) then {_threatLevelAT = _threatLevelAT + 2};
+		_detectedInfantry pushBackUnique _x;
 	};
 } forEach ([800,0,_markerPos, "BLUFORSPAWN"] call distanceUnits)
 
@@ -141,7 +143,7 @@ _recommendations = [_reinforcementsNeeded, _mortarRecommended, _antiVehicleStrik
 _threatLevels = [_threadLevelInfa, _threatLevelGround, _threatLevelAir, _threatLevelAT, _threatLevelAA];
 _detectedVehicles = [_detectedCARVehicles, _detectedARMOREDVehicles, _detectedAIRVehicles];
 
-_result = [_recommendations, _threatLevels, _detectedVehicles];
+_result = [_recommendations, _threatLevels, _detectedInfantry, _detectedVehicles];
 
 //Returning data
 _result

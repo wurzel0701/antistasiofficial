@@ -1,8 +1,17 @@
-params ["_marker", "_target",["_type", ""]];
+params ["_marker", "_target"];
 
-_isMarker = !(typeName _marker == "ARRAY");
-_markerPos = _marker;
-if (typeName _marker == "STRING") then {_markerPos = getMarkerPos (_marker)};
+private _markerPos;
+if (_target != nil) then 
+{
+	_markerPos = getPos _target;
+};
+if (_marker != nil) then 
+{
+	_isMarker = !(typeName _marker == "ARRAY");
+	_markerPos = _marker;
+	if (typeName _marker == "STRING") then {_markerPos = getMarkerPos (_marker)};
+};
+
 
 _threatLevelInfa = 0;
 _threatLevelAA = 0;

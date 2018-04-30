@@ -82,7 +82,6 @@ while{spawner getVariable _marker != 4} do
 				_spawnSPAA = true; /*Spawn tigris */
 				_spawnPos = (getMarkerPos _marker) findEmptyPosition [0,75,opSPAA];
 				sleep 0.5;
-				systemchat format ["AA pos %1",_spawnPos];
 				if (isnil _spawnPos) then {
 					_SPAA = createVehicle [opSPAA, _spawnPos, [], 0, "CAN_COLLIDE"];
 					_groupCrew = createGroup side_red;

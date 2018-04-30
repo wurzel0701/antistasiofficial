@@ -6,7 +6,7 @@ scriptName "resourcecheck";
 
 if (isMultiplayer) then {waitUntil {!isNil "switchCom"}};
 
-private ["_incomeFIA","_incomeEnemy","_hrFIA","_popFIA","_popEnemy","_bonusFIA","_bonusEnemy", "_cityInRange" ,"_city","_cityIncomeFIA","_cityIncomeEnemy","_cityIncomeHR","_data","_civilians","_supportFIA","_supportEnemy", "_supplyLevels","_power","_coef","_mrkD","_base","_factory","_resource","_text","_updated","_resourcesAAF","_vehicle","_script"];
+private ["_incomeFIA","_incomeEnemy","_hrFIA","_popFIA","_popEnemy","_bonusFIA","_bonusEnemy", "_cityInRange" ,"_city","_cityIncomeFIA","_cityIncomeEnemy","_cityIncomeHR","_data","_civilians","_supportFIA","_supportEnemy", "_supplyLevels","_power","_coef","_mrkD","_base","_factory","_resource","_text","_updated","_resourcesAAF","_vehicle","_script","_types"];
 
 //Sparker's War Statistics variables
 private _ws_territory = call ws_fnc_newGridArray;	//Array for the sum of AAF(positive) and FIA(negative) territories
@@ -105,10 +105,9 @@ while {true} do {
 					};
 				};
 			};
-			
-			if(getPos _city distance _positionHQ < 4000) then 
+			if(getmarkerPos _city distance _positionHQ < 4000) then
 			{
-				_cityInRange = _cityInRange + _city;
+				_cityInRange pushbackunique _city;
 			}
 		};
 
@@ -152,22 +151,27 @@ while {true} do {
 			[_city,_power] spawn AS_fnc_adjustLamps;
 		};
 	} forEach ciudades;
-	
-	_types = ["FOOD", "WATER", "FUEL"]
-	//@Stef i have reduced the amount to maximum 2 missions per tick each with 85% chance
-	for "_i" from 0 to ((count _cityInRange) max 2) do 
+
+	if(count mrkSupplyCrates < 6) then
 	{
-		if(Random 100 <= 85) then 
+		_cityDecreased = false;
+		for "_i" from 0 to 4 do
 		{
-			_type = selectRandom _types;
-			_types = _types - [_type];
 			_currentCity = selectRandom _cityInRange;
-			_cityInRange = _cityInRange - [_currentCity];
-			[_type, -1, _currentCity] spawn AS_fnc_changeCitySupply;
-			[_currentCity, _type] remoteExec ["SUP_CitySupply", call AS_fnc_getNextWorker];
-		}
-		
-	}
+			_types = [_currentCity, "GOOD"] call AS_fnc_getHighSupplies;
+			if(random 100 < 10) then {_types = [_currentCity, "LOW"] call AS_fnc_getHighSupplies};
+			systemchat format ["_types = %1",_types]; //Stef count _types doesn't work
+			if (((count _types) != 0) AND _cityDecreased) then
+			{
+				_cityDecreased = true;
+				_type = selectRandom _types;
+				[_type, -1, _currentCity] spawn AS_fnc_changeCitySupply;
+				_type = selectRandom _types;
+				[_currentCity, true, _type] remoteExec ["createSupplyPrefab", call AS_fnc_getNextWorker];
+			};
+		};
+	};
+
 
 	if ((_popFIA > _popEnemy) AND ("airport_3" in mrkFIA)) then {["end1",true,true,true,true] remoteExec ["BIS_fnc_endMission",0]};
 
